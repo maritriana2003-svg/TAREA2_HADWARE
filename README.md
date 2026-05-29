@@ -1,7 +1,8 @@
-````markdown
 # Control remoto de actuador PC ↔ Arduino UNO
 
 Proyecto desarrollado para la asignatura **Hardware Digital**.
+
+---
 
 ## Descripción del proyecto
 
@@ -15,17 +16,17 @@ Además, el programa genera una trama interna de 4 bytes con un byte de inicio `
 
 ## Integrantes
 
-- María Triana
-- Camila Montes
-- Fernanda Godoy
-- Gabriela Ovalle
+* María Triana
+* Camila Montes
+* Fernanda Godoy
+* Gabriela Ovalle
 
 ---
 
 ## Asignatura
 
-**Hardware Digital**  
-Docente: Diego Miranda  
+**Hardware Digital**
+Docente: Diego Miranda
 Universidad de Valparaíso
 
 ---
@@ -38,38 +39,38 @@ Diseñar e implementar un sistema electrónico de control embebido utilizando Ar
 
 ## Objetivos específicos
 
-- Enviar comandos desde el PC hacia el Arduino UNO mediante UART.
-- Controlar un LED y un buzzer usando comandos desde el Monitor Serial.
-- Generar una trama interna de 4 bytes para estructurar la información.
-- Incorporar un byte de inicio de trama `0xAA`.
-- Calcular un `checksum` como método de verificación.
-- Comprobar el funcionamiento mediante simulación en Tinkercad y montaje físico.
+* Enviar comandos desde el PC hacia el Arduino UNO mediante UART.
+* Controlar un LED y un buzzer usando comandos desde el Monitor Serial.
+* Generar una trama interna de 4 bytes para estructurar la información.
+* Incorporar un byte de inicio de trama `0xAA`.
+* Calcular un `checksum` como método de verificación.
+* Comprobar el funcionamiento mediante simulación en Tinkercad y montaje físico.
 
 ---
 
 ## Componentes utilizados
 
-- Arduino UNO
-- Cable USB
-- Protoboard
-- LED rojo
-- Buzzer piezoeléctrico
-- Resistencia de 220 Ω
-- Cables jumper
-- PC con Arduino IDE
+* Arduino UNO
+* Cable USB
+* Protoboard
+* LED rojo
+* Buzzer piezoeléctrico
+* Resistencia de 220 Ω
+* Cables jumper
+* PC con Arduino IDE
 
 ---
 
 ## Conexiones del circuito
 
-| Elemento | Conexión |
-|---|---|
-| LED positivo | Pin digital D13 |
-| LED negativo | Resistencia de 220 Ω hacia GND |
-| Buzzer positivo | Pin digital D8 |
-| Buzzer negativo | GND |
-| GND Arduino | Línea negativa de la protoboard |
-| Alimentación | Cable USB desde el PC |
+| Elemento        | Conexión                        |
+| --------------- | ------------------------------- |
+| LED positivo    | Pin digital D13                 |
+| LED negativo    | Resistencia de 220 Ω hacia GND  |
+| Buzzer positivo | Pin digital D8                  |
+| Buzzer negativo | GND                             |
+| GND Arduino     | Línea negativa de la protoboard |
+| Alimentación    | Cable USB desde el PC           |
 
 ---
 
@@ -77,24 +78,24 @@ Diseñar e implementar un sistema electrónico de control embebido utilizando Ar
 
 La comunicación entre el PC y el Arduino UNO se realiza mediante UART utilizando el puerto serial disponible a través del cable USB.
 
-| Parámetro | Valor |
-|---|---|
-| Velocidad | 115200 baudios |
-| Bits de datos | 8 bits |
-| Paridad | Sin paridad |
-| Bits de parada | 1 bit |
-| Control de flujo | Ninguno |
+| Parámetro        | Valor          |
+| ---------------- | -------------- |
+| Velocidad        | 115200 baudios |
+| Bits de datos    | 8 bits         |
+| Paridad          | Sin paridad    |
+| Bits de parada   | 1 bit          |
+| Control de flujo | Ninguno        |
 
 ---
 
 ## Comandos disponibles
 
-| Comando | Acción |
-|---|---|
-| `ON` | Enciende el LED y activa el buzzer |
-| `OFF` | Apaga el LED y desactiva el buzzer |
-| `ESTADO` | Consulta el estado actual del sistema |
-| Otro texto | Muestra mensaje de comando inválido |
+| Comando    | Acción                                |
+| ---------- | ------------------------------------- |
+| `ON`       | Enciende el LED y activa el buzzer    |
+| `OFF`      | Apaga el LED y desactiva el buzzer    |
+| `ESTADO`   | Consulta el estado actual del sistema |
+| Otro texto | Muestra mensaje de comando inválido   |
 
 ---
 
@@ -102,21 +103,21 @@ La comunicación entre el PC y el Arduino UNO se realiza mediante UART utilizand
 
 El sistema utiliza una trama interna de 4 bytes:
 
-| Byte | Función | Descripción |
-|---|---|---|
-| Byte 0 | SOF | Inicio de trama, valor fijo `0xAA` |
+| Byte   | Función       | Descripción                         |
+| ------ | ------------- | ----------------------------------- |
+| Byte 0 | SOF           | Inicio de trama, valor fijo `0xAA`  |
 | Byte 1 | ID de comando | Identifica si es control o consulta |
-| Byte 2 | Valor | Indica encendido, apagado o estado |
-| Byte 3 | Checksum | Suma de comprobación |
+| Byte 2 | Valor         | Indica encendido, apagado o estado  |
+| Byte 3 | Checksum      | Suma de comprobación                |
 
 ---
 
 ## Ejemplos de tramas
 
-| Comando | Trama generada |
-|---|---|
-| `ON` | `[0xAA, 0x01, 0x01, 0xAC]` |
-| `OFF` | `[0xAA, 0x01, 0x00, 0xAB]` |
+| Comando  | Trama generada                   |
+| -------- | -------------------------------- |
+| `ON`     | `[0xAA, 0x01, 0x01, 0xAC]`       |
+| `OFF`    | `[0xAA, 0x01, 0x00, 0xAB]`       |
 | `ESTADO` | `[0xAA, 0x02, Estado, Checksum]` |
 
 ---
@@ -135,18 +136,17 @@ El sistema utiliza una trama interna de 4 bytes:
 
 ## Archivos del proyecto
 
-El repositorio contiene los siguientes archivos y carpetas principales:
-
-| Archivo / Carpeta | Descripción |
-|---|---|
-| `CODIGO_FUENTE/` | Carpeta que contiene el código fuente del proyecto Arduino. |
-| `control_remoto_actuador.ino` | Código principal cargado en el Arduino UNO. |
-| `EvidenciaArduino/` | Carpeta con fotografías del montaje físico del circuito. |
-| `Imagen del diagrama de bloques.png` | Diagrama de bloques del funcionamiento del sistema. |
-| `esquema_conexiones_y_pines.png` | Imagen del esquema de conexiones y pines utilizados. |
-| `Informe Control remoto de actuador PC ↔ Arduino UNO.pdf` | Informe técnico del proyecto. |
-| `Video_Demostracion_Control_Remoto_Actuador.mp4` | Video demostrativo del sistema funcionando. |
-| `README.md` | Documento principal del repositorio con la descripción del proyecto. |
+| Archivo / Carpeta                                         | Descripción                                             |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| `CODIGO_FUENTE/`                                          | Carpeta que contiene el código fuente del proyecto.     |
+| `Codigo`                                                  | Código principal utilizado en Arduino.                  |
+| `EvidenciaArduino/`                                       | Carpeta con fotografías del montaje físico del Arduino. |
+| `IMG_0684 (1).jpg`                                        | Imagen de evidencia del Arduino armado.                 |
+| `Imagen del diagrama de bloques.png`                      | Diagrama de bloques del funcionamiento del sistema.     |
+| `esquema_conexiones-y-pines.png`                          | Imagen del esquema de conexiones y pines utilizados.    |
+| `Informe Control remoto de actuador PC ↔ Arduino UNO.pdf` | Informe técnico principal del proyecto.                 |
+| `Video_Demostracion_Control_Remoto_Actuador.mp4`          | Video demostrativo del sistema funcionando.             |
+| `README.md`                                               | Documento principal del repositorio.                    |
 
 ---
 
@@ -154,17 +154,13 @@ El repositorio contiene los siguientes archivos y carpetas principales:
 
 El código principal del proyecto se encuentra en la carpeta:
 
-```text
-CODIGO_FUENTE/
-````
+`CODIGO_FUENTE/`
 
-Archivo recomendado:
+Archivo utilizado:
 
-```text
-control_remoto_actuador.ino
-```
+`Codigo`
 
-El programa configura el LED en el pin digital **D13** y el buzzer en el pin digital **D8**. Además, inicia la comunicación serial a **115200 baudios**, interpreta los comandos recibidos desde el PC y genera una respuesta mediante el Monitor Serial.
+Este archivo contiene el programa cargado en el Arduino UNO. El código configura el LED en el pin digital **D13** y el buzzer en el pin digital **D8**. Además, inicia la comunicación serial a **115200 baudios**, interpreta los comandos enviados desde el PC y genera respuestas mediante el Monitor Serial.
 
 ---
 
@@ -174,18 +170,17 @@ El video de demostración muestra el funcionamiento del sistema **PC ↔ Arduino
 
 En el video se evidencia:
 
-* Conexión física del Arduino UNO.
-* Envío de comandos desde el Monitor Serial.
-* Activación del LED y buzzer con el comando `ON`.
-* Desactivación del LED y buzzer con el comando `OFF`.
+* El montaje físico del Arduino UNO.
+* El LED y buzzer conectados.
+* El envío de comandos desde el Monitor Serial.
+* Activación del sistema con el comando `ON`.
+* Desactivación del sistema con el comando `OFF`.
 * Consulta del estado mediante el comando `ESTADO`.
 * Respuesta del Arduino al PC mediante comunicación UART.
 
 Archivo del video:
 
-```text
-Video_Demostracion_Control_Remoto_Actuador.mp4
-```
+`Video_Demostracion_Control_Remoto_Actuador.mp4`
 
 ---
 
@@ -213,9 +208,7 @@ El sistema fue probado en:
 
 Carpeta de evidencias:
 
-```text
-EvidenciaArduino/
-```
+`EvidenciaArduino/`
 
 ---
 
@@ -241,8 +234,3 @@ EvidenciaArduino/
 ## Conclusión
 
 El proyecto permitió implementar un sistema funcional de comunicación UART entre un PC y un Arduino UNO. A través del Monitor Serial fue posible controlar un LED y un buzzer de forma remota. Además, el uso de una trama estructurada y checksum permitió reforzar la validación del protocolo, demostrando comunicación bidireccional y control remoto de actuadores.
-
----
-
-```
-```
