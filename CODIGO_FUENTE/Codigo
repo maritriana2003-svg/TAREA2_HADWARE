@@ -1,99 +1,112 @@
-// Tus pines exactos
+// Proyecto de Comunicación Serial - Ingeniería en Informática
+// Implementación de parseo de texto y empaquetado en tramas de bytes
+
+// Configuración de pines para periféricos
 const int pinLED = 13;
 const int pinBuzzer = 8;
 
 String comandoTexto = "";
 
-// Variables de la Rúbrica para almacenar la trama de 4 Bytes
+// Estructura de almacenamiento para la trama de 4 bytes
 byte bufferRX[4];
 unsigned long tiempoInicio = 0;
 unsigned long tiempoFin = 0;
 
 void setup() {
-  Serial.begin(115200); 
+  // Inicialización del puerto serial a 115200 baudios
+  Serial.begin(115200);
+
+  // Configuración de los pines como salidas
   pinMode(pinLED, OUTPUT);
   pinMode(pinBuzzer, OUTPUT);
-  
-  // Todo inicia apagado al arrancar
+
+  // Estado inicial por defecto (apagado)
   digitalWrite(pinLED, LOW);
   noTone(pinBuzzer);
-  
-  Serial.println("--- SISTEMA LISTO (ENTRADA EN TEXTO - SALIDA EN TRAMA) ---");
+
+  Serial.println("--- SISTEMA READY (TEXTO -> TRAMA DE BYTES) ---");
 }
 
 void loop() {
-  // Criterio 2 y 3: Muestreo no bloqueante y medición de tiempo inicial
+  // Registros de tiempo inicial en microsegundos para medir latencia
   tiempoInicio = micros();
 
+  // Control de flujo no bloqueante: verificación de datos en el búfer de entrada
   if (Serial.available() > 0) {
+    // Lectura del string hasta el salto de línea y remoción de caracteres de control
     comandoTexto = Serial.readStringUntil('\n');
-    comandoTexto.trim(); 
+    comandoTexto.trim();
 
-    bufferRX[0] = 0xAA; // SOF fijo
+    // Construcción del encabezado de la trama: Byte de inicio (SOF)
+    bufferRX[0] = 0xAA;
 
+    // Evaluación del comando recibido: Encendido
     if (comandoTexto == "ON" || comandoTexto == "on") {
-      bufferRX[1] = 0x01; // ID Comando Control
-      bufferRX[2] = 0x01; // Valor: Encender
-      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]); 
+      bufferRX[1] = 0x01; // ID: Control de actuadores
+      bufferRX[2] = 0x01; // Data: Estado ALTO
+      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]); // Suma de comprobación (Checksum de 8 bits)
 
+      // Control directo sobre el hardware
       digitalWrite(pinLED, HIGH);
       tone(pinBuzzer, 440);
 
+      // Salida por monitor serial para depuración de la trama
       Serial.print("TRAMA GENERADA INTERNAMENTE: [0xAA, 0x01, 0x01, 0x");
       Serial.print(bufferRX[3], HEX);
-      Serial.println("] -> Éxito");
-      
+      Serial.println("] -> Éxito!");
+
+      // Cálculo del tiempo de ejecución del proceso
       tiempoFin = micros();
       Serial.print("Tiempo de respuesta: ");
       Serial.print(tiempoFin - tiempoInicio);
       Serial.println(" us");
-    } 
-    
-    else if (comandoTexto == "OFF" || comandoTexto == "off") {
-      bufferRX[1] = 0x01; // ID Comando Control
-      bufferRX[2] = 0x00; // Valor: Apagar
-      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]); 
+    }
 
+    // Evaluación del comando recibido: Apagado
+    else if (comandoTexto == "OFF" || comandoTexto == "off") {
+      bufferRX[1] = 0x01; // ID: Control de actuadores
+      bufferRX[2] = 0x00; // Data: Estado BAJO
+      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]);
+
+      // Apagado físico de los periféricos
       digitalWrite(pinLED, LOW);
       noTone(pinBuzzer);
 
       Serial.print("TRAMA GENERADA INTERNAMENTE: [0xAA, 0x01, 0x00, 0x");
       Serial.print(bufferRX[3], HEX);
-      Serial.println("] -> Éxito");
-      
+      Serial.println("] -> Éxito!");
+
       tiempoFin = micros();
       Serial.print("Tiempo de respuesta: ");
       Serial.print(tiempoFin - tiempoInicio);
       Serial.println(" us");
-    } 
-    
+    }
+
+    // Evaluación del comando recibido: Lectura de estado
     else if (comandoTexto == "ESTADO" || comandoTexto == "estado") {
-      bufferRX[1] = 0x02; // ID Comando Estado
-      
-      // Revisa el estado real en el que está el LED en ese momento
+      bufferRX[1] = 0x02; // ID: Consulta de telemetría
       byte estadoActual = (digitalRead(pinLED) == HIGH) ? 0x01 : 0x00;
-      bufferRX[2] = estadoActual; 
-      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]); 
+      bufferRX[2] = estadoActual;
+      bufferRX[3] = (byte)(bufferRX[0] + bufferRX[1] + bufferRX[2]);
 
-      // SE QUITÓ EL APAGADO FORZADO. El circuito no cambia al preguntar.
-
-      // IMPRESIÓN EXIGIDA POR RÚBRICA: Desglose completo de bytes
-      Serial.println("Trama de Estado Estructurada (Criterio 1):");
+      // Desglose de la trama estructurada byte por byte
+      Serial.println("Trama de Estado (Estructura Criterio 1):");
       Serial.print("Byte 0 (SOF): 0x"); Serial.println(bufferRX[0], HEX);
       Serial.print("Byte 1 (ID Comando): 0x"); Serial.println(bufferRX[1], HEX);
       Serial.print("Byte 2 (Valor Estado): 0x"); Serial.println(bufferRX[2], HEX);
       Serial.print("Byte 3 (Checksum): 0x"); Serial.println(bufferRX[3], HEX);
-      Serial.println("------------------------------------------------");
+      Serial.println("----------------------------------------------");
       Serial.println("Muestreo No Bloqueante: Completo sin Delays (0 us)");
-    } 
-    
+    }
+
     else {
       Serial.println("Comando inválido. Escribe de forma normal: ON, OFF o ESTADO");
     }
   }
 
+  // Carga matemática simulada para forzar el procesamiento en paralelo dentro del loop
   volatile float calculoRendimiento = 0;
-  for(int i = 0; i < 15; i++) {
+  for (int i = 0; i < 15; i++) {
     calculoRendimiento += sin(i) * cos(i);
   }
 }
