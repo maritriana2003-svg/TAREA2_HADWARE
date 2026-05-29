@@ -1,45 +1,149 @@
- # Tarea 2: Sistema de Comunicación Serial entre Dispositivos
+# Control remoto de actuador PC ↔ Arduino UNO
 
-## 🏛️ Universidad de Valparaíso
-* **Facultad:** Ingeniería
-* **Escuela:** Ingeniería en Informática (Campus San Felipe)
-* **Asignatura:** Hardware Digital (ISF-215)
-* **Docente:** Diego Miranda
+## Descripción
 
----
+Este proyecto consiste en un sistema de control remoto de actuadores mediante comunicación serial UART entre un PC y un Arduino UNO.
 
-## 👥 Integrantes y Roles
-| Nombre Completo | Rol Asignado | Correo Institucional |
-| :--- | :--- | :--- |
-| **Adriana Castillo Uribe** | Coordinadora de Firmware / QA | adriana.castillo@alumnos.uv.cl |
-| *[Nombre Integrante 2]* | Diseñador de Protocolo / UML | *[Correo]* |
-| *[Nombre Integrante 3]* | Encargado de Documentación | *[Correo]* |
+El PC envía comandos desde el Monitor Serial del Arduino IDE y el Arduino recibe, interpreta y ejecuta la orden correspondiente. Según el comando recibido, el sistema permite encender, apagar o consultar el estado de un LED y un buzzer.
 
----
+Además, el programa genera una trama interna de 4 bytes con un byte de inicio `0xAA` y un checksum para validar la estructura del mensaje.
 
-## 🚀 Avance 1: Prueba de Concepto (Esquema Polling)
-Este repositorio contiene el avance inicial para el desarrollo de la **Tarea 2**. Actualmente se encuentra implementada la infraestructura física básica y una solución de software de prueba basada en **Polling**, permitiendo verificar la correcta respuesta de los periféricos y la conexión física con la PC.
+## Integrantes
 
-### 🛠️ Hardware y Periféricos Utilizados:
-* **Nodo 1 (Maestro):** Computadora Personal (PC) como terminal de control.
-* **Nodo 2 (Esclavo):** Arduino UNO R3.
-* **Actuador Sonoro:** Buzzer Piezoeléctrico conectado al **Pin Digital 8** para alertas del sistema.
-* **Actuador Lumínico:** LED Indicador integrado conectado al **Pin Digital 13**.
-* **Canal de Enlace:** Cable USB de Arduino (Interfaz UART mapeada a puerto COM virtual).
+- María Triana
+- Camila Montes
+- Fernanda Godoy
+- Gabriela Ovalle
 
----
+## Asignatura
 
-### ⚙️ Funcionalidad del Código Base
-El sistema lee cadenas de caracteres mediante funciones de lectura serial tradicionales en el lazo principal. Reacciona ante los siguientes comandos directos ingresados en el Monitor Serial de la PC:
-* `"ON"`: Enciende el LED del pin 13 y activa un tono continuo en el buzzer.
-* `"OFF"`: Apaga el LED y silencia las frecuencias del buzzer.
-* `"ESTADO"`: Envía un reporte de confirmación en texto plano de vuelta a la pantalla de la PC.
+**Hardware Digital**  
+Docente: Diego Miranda  
+Universidad de Valparaíso
 
----
+## Objetivo general
 
-## 📅 Próximos Hitos de Desarrollo (Hacia la Entrega Final)
-Para cumplir con las exigencias de la rúbrica y los requerimientos del profesor, las siguientes versiones incluirán:
-1. **Migración a Interrupciones (ISR):** Configuración del registro `UCSR0B` para lectura por hardware mediante `ISR(USART_RX_vect)`.
-2. **Estructura de Trama Binaria:** Definición formal de un paquete de 4 bytes con campo de sincronización (`SOF = 0xAA`) y verificación **Checksum (XOR)**.
-3. **Control de Robustez:** Rutina de manejo de errores físicos ante tramas corruptas (ráfagas de alerta audibles).
-4. **Análisis Cuantitativo:** Mediciones de latencia con `micros()` para las gráficas comparativas del informe técnico.
+Diseñar e implementar un sistema electrónico de control embebido utilizando Arduino UNO, gobernado por comunicación serial UART y orientado al control remoto de actuadores.
+
+## Objetivos específicos
+
+- Enviar comandos desde el PC hacia el Arduino UNO mediante UART.
+- Controlar un LED y un buzzer usando comandos desde el Monitor Serial.
+- Generar una trama de 4 bytes para estructurar la información.
+- Incorporar un byte de inicio de trama `0xAA`.
+- Calcular un checksum como método de verificación.
+- Comprobar el funcionamiento mediante simulación en Tinkercad y montaje físico.
+
+## Componentes utilizados
+
+- Arduino UNO
+- Cable USB
+- Protoboard
+- LED rojo
+- Buzzer piezoeléctrico
+- Resistencia de 220 Ω
+- Cables jumper
+- PC con Arduino IDE
+
+## Conexiones
+
+| Elemento | Conexión |
+|---|---|
+| LED positivo | Pin digital D13 |
+| LED negativo | Resistencia de 220 Ω hacia GND |
+| Buzzer positivo | Pin digital D8 |
+| Buzzer negativo | GND |
+| GND Arduino | Línea negativa de la protoboard |
+| Alimentación | Cable USB desde el PC |
+
+## Comunicación UART
+
+| Parámetro | Valor |
+|---|---|
+| Velocidad | 115200 baudios |
+| Bits de datos | 8 bits |
+| Paridad | Sin paridad |
+| Bits de parada | 1 bit |
+| Control de flujo | Ninguno |
+
+## Comandos disponibles
+
+| Comando | Acción |
+|---|---|
+| `ON` | Enciende el LED y activa el buzzer |
+| `OFF` | Apaga el LED y desactiva el buzzer |
+| `ESTADO` | Consulta el estado actual del sistema |
+| Otro texto | Muestra mensaje de comando inválido |
+
+## Protocolo de comunicación
+
+El sistema utiliza una trama interna de 4 bytes:
+
+| Byte | Función | Descripción |
+|---|---|---|
+| Byte 0 | SOF | Inicio de trama, valor fijo `0xAA` |
+| Byte 1 | ID de comando | Identifica si es control o consulta |
+| Byte 2 | Valor | Indica encendido, apagado o estado |
+| Byte 3 | Checksum | Suma de comprobación |
+
+## Ejemplos de tramas
+
+| Comando | Trama generada |
+|---|---|
+| `ON` | `[0xAA, 0x01, 0x01, 0xAC]` |
+| `OFF` | `[0xAA, 0x01, 0x00, 0xAB]` |
+| `ESTADO` | `[0xAA, 0x02, Estado, Checksum]` |
+
+## Funcionamiento
+
+1. El usuario escribe un comando en el Monitor Serial.
+2. El Arduino UNO recibe el comando mediante UART.
+3. El programa interpreta la orden recibida.
+4. Se genera una trama interna de 4 bytes.
+5. Se calcula el checksum.
+6. Según el comando, se activa o desactiva el LED y el buzzer.
+7. El Arduino responde al PC con el estado, confirmación o error.
+
+## Archivos del proyecto
+
+- `control_remoto_actuador.ino`: código principal del Arduino.
+- `Informe_Control_Remoto_Actuador.pdf`: informe técnico del proyecto.
+- `Presentacion_Control_Remoto_Actuador.pdf`: presentación del proyecto.
+- Carpeta de evidencias: imágenes del montaje físico, Tinkercad y Monitor Serial.
+
+## Pruebas realizadas
+
+| Prueba | Resultado esperado | Resultado obtenido |
+|---|---|---|
+| Inicialización | Actuadores apagados y mensaje inicial | Correcto |
+| `ON` | LED encendido y buzzer activo | Correcto |
+| `OFF` | LED y buzzer apagados | Correcto |
+| `ESTADO` | Respuesta del estado actual | Correcto |
+| Comando inválido | Mensaje de error | Correcto |
+
+## Evidencias
+
+El sistema fue probado en:
+
+- Simulación en Tinkercad.
+- Montaje físico con Arduino UNO.
+- Monitor Serial del Arduino IDE.
+- Pruebas de encendido, apagado y consulta de estado.
+
+## Limitaciones
+
+- El sistema depende del cable USB para la comunicación con el PC.
+- Al desconectar o reiniciar el Arduino, el sistema vuelve al estado inicial apagado.
+- Los comandos deben escribirse correctamente para ser reconocidos.
+
+## Mejoras futuras
+
+- Implementar interrupciones UART por hardware.
+- Guardar el último estado usando memoria EEPROM.
+- Agregar más comandos de control.
+- Crear una interfaz gráfica en el PC.
+- Mejorar el control de frecuencia del buzzer.
+
+## Conclusión
+
+El proyecto permitió implementar un sistema funcional de comunicación UART entre un PC y un Arduino UNO. A través del Monitor Serial fue posible controlar un LED y un buzzer de forma remota. Además, el uso de una trama estructurada y checksum permitió reforzar la validación del protocolo, demostrando comunicación bidireccional y control remoto de actuadores.
