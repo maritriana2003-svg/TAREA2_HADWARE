@@ -20,6 +20,7 @@ Además, el programa genera una trama interna de 4 bytes con un byte de inicio `
 * Camila Montes
 * Fernanda Godoy
 * Gabriela Ovalle
+* Vicente Carrasco
 
 ---
 
